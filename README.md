@@ -1,8 +1,10 @@
 # grpool
+[![Travis](https://img.shields.io/travis/Yezersky/grpool.svg?style=flat-square)](https://travis-ci.org/Yezersky/grpool)
+[![Coveralls](https://img.shields.io/coveralls/Yezersky/grpool.svg?style=flat-square)](https://coveralls.io/github/Yezersky/grpool)
 
 A simple goroutine worker pool.
 
-### Install
+## Install
 
 ```
 $ go get github.com/yezersky/grpool
