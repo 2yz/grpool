@@ -28,7 +28,7 @@ func (u *WrapWorkUnit) Run() {
 }
 
 func main() {
-	wp := grpool.NewWorkerPool(2)
+	wp, _ := grpool.NewWorkerPool(2)
 	wp.Start()
 
 	// queue work unit immediately
