@@ -29,12 +29,16 @@ func (u *TestWrapWorkUnit) Run() {
 }
 
 func TestNewWorkerPool(t *testing.T) {
-	NewWorkerPool(0)
-	NewWorkerPool(10)
+	if _, err := NewWorkerPool(0); err == nil {
+		t.Error("NewWorkerPool(0) should return error")
+	}
+	if _, err := NewWorkerPool(10); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestWorkerPool_Queue1(t *testing.T) {
-	wp := NewWorkerPool(1)
+	wp, _ := NewWorkerPool(1)
 	wp.Start()
 	wp.Queue(&TestWorkUnit{})
 	time.Sleep(10 * time.Millisecond)
@@ -48,7 +52,7 @@ func TestWorkerPool_Queue1(t *testing.T) {
 }
 
 func TestWorkerPool_QueueAndWait1(t *testing.T) {
-	wp := NewWorkerPool(1)
+	wp, _ := NewWorkerPool(1)
 	wp.Start()
 	wp.QueueAndWait(&TestPanicWorkUnit{})
 	wp.QueueAndWait(&TestPanicWorkUnit{})
@@ -57,7 +61,7 @@ func TestWorkerPool_QueueAndWait1(t *testing.T) {
 
 // test wait tick
 func TestWorkerPool_QueueAndWait2(t *testing.T) {
-	wp := NewWorkerPool(1)
+	wp, _ := NewWorkerPool(1)
 	wp.Start()
 	wp.QueueAndWait(&TestWrapWorkUnit{
 		Func: func() {
@@ -72,7 +76,7 @@ func TestWorkerPool_QueueAndWait2(t *testing.T) {
 }
 
 func TestWorkerPool_clearWorkerQueue(t *testing.T) {
-	wp := NewWorkerPool(10)
+	wp, _ := NewWorkerPool(10)
 	for i := 0; i < 10; i++ {
 		wp.Queue(&TestWrapWorkUnit{
 			Func: func() {},
@@ -82,7 +86,7 @@ func TestWorkerPool_clearWorkerQueue(t *testing.T) {
 }
 
 func TestWorkerPool_isRelease(t *testing.T) {
-	wp := NewWorkerPool(1)
+	wp, _ := NewWorkerPool(1)
 	wp.Start()
 	wp.workerQueue <- wp.newWorker()
 	w := wp.newWorker()
@@ -93,7 +97,7 @@ func TestWorkerPoolParallel(t *testing.T) {
 	var wg sync.WaitGroup
 	var ops uint64 = 0
 	n := runtime.NumCPU()
-	wp := NewWorkerPool(n)
+	wp, _ := NewWorkerPool(n)
 	wp.Start()
 	for i := 0; i < n*2; i++ {
 		wg.Add(1)
@@ -120,7 +124,7 @@ func TestWorkerPoolParallel(t *testing.T) {
 }
 
 func TestWorkerPoolRestart(t *testing.T) {
-	wp := NewWorkerPool(1)
+	wp, _ := NewWorkerPool(1)
 	wp.Start()
 	wp.QueueAndWait(&TestPanicWorkUnit{})
 	wp.StopAndWait()
@@ -133,7 +137,7 @@ func TestWorkerPoolRestart(t *testing.T) {
 }
 
 func BenchmarkWorkerPool(b *testing.B) {
-	wp := NewWorkerPool(runtime.NumCPU())
+	wp, _ := NewWorkerPool(runtime.NumCPU())
 	wp.Start()
 	for i := 0; i < b.N; i++ {
 		wp.QueueAndWait(&TestWorkUnit{})

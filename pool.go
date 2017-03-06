@@ -19,11 +19,11 @@ type WorkerPool struct {
 	mustStop        bool
 }
 
-func NewWorkerPool(maxWorkerNumber int) *WorkerPool {
+func NewWorkerPool(maxWorkerNumber int) (*WorkerPool, error) {
 	if maxWorkerNumber < 1 {
-		return nil
+		return nil, errors.New("maxWorkerNumber must be larger than 0")
 	}
-	return &WorkerPool{
+	wp := &WorkerPool{
 		maxWorkerNumber: maxWorkerNumber,
 		workerCount:     0,
 		workerQueue:     make(chan *Worker, maxWorkerNumber),
@@ -36,6 +36,7 @@ func NewWorkerPool(maxWorkerNumber int) *WorkerPool {
 		},
 		cond: sync.NewCond(&sync.Mutex{}),
 	}
+	return wp, nil
 }
 
 func (wp *WorkerPool) Start() {
