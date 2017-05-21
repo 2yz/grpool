@@ -75,15 +75,16 @@ func (wp *WorkerPool) clearWorkerQueue() {
 }
 
 func (wp *WorkerPool) Queue(unit WorkUnit) error {
-	return wp.queue(unit, NO_WAIT)
+	go wp.queue(unit)
+	return nil
 }
 
 func (wp *WorkerPool) QueueAndWait(unit WorkUnit) error {
-	return wp.queue(unit, WAIT)
+	return wp.queue(unit)
 }
 
-func (wp *WorkerPool) queue(unit WorkUnit, isWait bool) error {
-	w, err := wp.getWorker(isWait)
+func (wp *WorkerPool) queue(unit WorkUnit) error {
+	w, err := wp.getWorker()
 	if err != nil {
 		return err
 	}
@@ -91,7 +92,7 @@ func (wp *WorkerPool) queue(unit WorkUnit, isWait bool) error {
 	return nil
 }
 
-func (wp *WorkerPool) getWorker(isWait bool) (*Worker, error) {
+func (wp *WorkerPool) getWorker() (*Worker, error) {
 	createWorker := false
 
 	wp.cond.L.Lock()
@@ -111,17 +112,6 @@ func (wp *WorkerPool) getWorker(isWait bool) (*Worker, error) {
 		return w, nil
 	}
 
-	// NO_WAIT
-	if !isWait {
-		select {
-		case w := <-wp.workerQueue:
-			return w, nil
-		default:
-			return nil, errors.New("No Worker Available")
-		}
-	}
-
-	// WAIT
 	tick := time.Tick(10 * time.Millisecond)
 	for {
 		select {
