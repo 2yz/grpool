@@ -49,8 +49,7 @@ func main() {
     wp, _ := grpool.NewWorkerPool(2)
     wp.Start()
 
-    // queue work unit immediately
-    // if no worker is available, it returns an error
+    // queue work unit
     err := wp.Queue(&MyWorkUnit{})
     if err != nil {
         // ...
